@@ -27,6 +27,12 @@ TourAid provides a **simple and fast way to access medical help**:
 
 ---
 
+ ## 🎨 Design (Figma)
+
+[![View Figma Design](https://img.shields.io/badge/Figma-View%20Design-blue?logo=figma)](https://www.figma.com/design/riPkfiXNQ0t3GuLqxmWbtc/Untitled?node-id=15-1458&t=Hu7DmS4G28YijguM-1)
+
+---
+
 ## 🔥 Unique Feature (USP)
 
 ### 🌍 In-App Medical Translation
@@ -64,7 +70,7 @@ Instead of relying only on English-speaking doctors:
 
 ## 📂 Project Structure
 
-```bash
+```bash id="h3r9k1"
 src/
  ├── components/
  │   ├── layout/
@@ -111,20 +117,20 @@ src/
 
 ### 1. Clone the repository
 
-```bash
+```bash id="q9x2m4"
 git clone https://github.com/your-username/touraid.git
 cd touraid
 ```
 
 ### 2. Install dependencies
 
-```bash
+```bash id="m1c7v8"
 npm install
 ```
 
 ### 3. Run the project
 
-```bash
+```bash id="z8k2p1"
 npm run dev
 ```
 
@@ -141,14 +147,6 @@ npm run dev
 
 ---
 
-## ⚠️ Limitations
-
-* Uses static/dummy data (initial version)
-* No real-time hospital availability
-* Pricing is approximate
-
----
-
 ## 🎯 Project Goals
 
 * Solve real-world tourist problems
@@ -157,7 +155,7 @@ npm run dev
 
 ---
 
-##  Contributing
+## 🤝 Contributing
 
 Contributions are welcome!
 
@@ -168,6 +166,6 @@ Contributions are welcome!
 
 ---
 
-##  Final Note
+## 🙌 Final Note
 
 TourAid focuses on **practical healthcare accessibility for travelers**, prioritizing **simplicity over complexity** to deliver real value.
