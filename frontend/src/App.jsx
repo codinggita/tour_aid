@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
+import Home from './pages/Home';
 
 // Temporary placeholder components
 const FindDoctor = () => <div><h2>Find a Doctor</h2><p>Search for specialists near you.</p></div>;
@@ -11,10 +12,11 @@ const App = () => {
     <Router>
       <MainLayout>
         <Routes>
-          <Route path="/" element={<Navigate to="/find-doctor" replace />} />
+          <Route path="/" element={<Home />} />
           <Route path="/find-doctor" element={<FindDoctor />} />
           <Route path="/emergency" element={<Emergency />} />
           <Route path="/about" element={<About />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </MainLayout>
     </Router>
