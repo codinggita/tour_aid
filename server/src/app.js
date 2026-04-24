@@ -1,5 +1,5 @@
 const express = require('express');
-const { errorHandler } = require('./middleware/errorMiddleware');
+const { errorHandler } = require('./middlewares/errorMiddleware');
 const hospitalRoutes = require('./routes/hospitalRoutes');
 
 const app = express();
