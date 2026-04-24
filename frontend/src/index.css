@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-blue: #2196F3;
+  --color-primary-hover: #1976D2;
+  --color-bg-light: #F5F7FA;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-light text-gray-800;
+  }
+}
