@@ -6,37 +6,43 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 h-[70px] bg-white shadow-sm flex items-center">
       <div className="container mx-auto px-8 flex items-center justify-between">
         <div className="flex items-center">
-          <NavLink to="/" className="text-2xl font-extrabold text-primary-blue tracking-tight">
+          <span className="text-2xl font-extrabold text-primary-blue tracking-tight select-none cursor-default">
             TourAid
-          </NavLink>
+          </span>
         </div>
 
         <div className="hidden md:flex items-center gap-10">
-          <NavLink 
-            to="/find-doctor" 
-            className={({ isActive }) => 
-              `relative py-2 font-medium transition-colors duration-200 ${
-                isActive ? 'text-primary-blue after:absolute after:bottom-[-2px] after:left-0 after:w-full after:height-[2px] after:bg-primary-blue after:rounded-full' : 'text-gray-500 hover:text-primary-blue'
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `relative py-2 font-medium transition-colors duration-200 ${isActive ? 'text-primary-blue after:absolute after:bottom-[-2px] after:left-0 after:w-full after:h-[2px] after:bg-primary-blue after:rounded-full' : 'text-gray-500 hover:text-primary-blue'
+              }`
+            }
+          >
+            Home
+          </NavLink>
+          <NavLink
+            to="/find-doctor"
+            className={({ isActive }) =>
+              `relative py-2 font-medium transition-colors duration-200 ${isActive ? 'text-primary-blue after:absolute after:bottom-[-2px] after:left-0 after:w-full after:height-[2px] after:bg-primary-blue after:rounded-full' : 'text-gray-500 hover:text-primary-blue'
               }`
             }
           >
             Find a Doctor
           </NavLink>
-          <NavLink 
-            to="/emergency" 
-            className={({ isActive }) => 
-              `relative py-2 font-medium transition-colors duration-200 ${
-                isActive ? 'text-primary-blue after:absolute after:bottom-[-2px] after:left-0 after:w-full after:height-[2px] after:bg-primary-blue after:rounded-full' : 'text-gray-500 hover:text-primary-blue'
+          <NavLink
+            to="/emergency"
+            className={({ isActive }) =>
+              `relative py-2 font-medium transition-colors duration-200 ${isActive ? 'text-primary-blue after:absolute after:bottom-[-2px] after:left-0 after:w-full after:height-[2px] after:bg-primary-blue after:rounded-full' : 'text-gray-500 hover:text-primary-blue'
               }`
             }
           >
             Emergency
           </NavLink>
-          <NavLink 
-            to="/about" 
-            className={({ isActive }) => 
-              `relative py-2 font-medium transition-colors duration-200 ${
-                isActive ? 'text-primary-blue after:absolute after:bottom-[-2px] after:left-0 after:w-full after:height-[2px] after:bg-primary-blue after:rounded-full' : 'text-gray-500 hover:text-primary-blue'
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              `relative py-2 font-medium transition-colors duration-200 ${isActive ? 'text-primary-blue after:absolute after:bottom-[-2px] after:left-0 after:w-full after:height-[2px] after:bg-primary-blue after:rounded-full' : 'text-gray-500 hover:text-primary-blue'
               }`
             }
           >
