@@ -1,60 +1,7 @@
 import { useState } from 'react';
 import { Phone, MapPin, Star, ChevronDown, Map, Navigation } from 'lucide-react';
-
-const hospitals = [
-  {
-    id: 1,
-    name: 'Global Health Medical Center',
-    image: '/images/hospital1.png',
-    rating: 4.9,
-    reviews: 312,
-    distance: '1.2 km',
-    location: 'Downtown, Paris',
-    languages: ['English', 'French'],
-    fee: '$40',
-    specialties: ['Cardiology', 'Multi-specialty'],
-    openNow: true,
-  },
-  {
-    id: 2,
-    name: "St. Mary's Specialty Clinic",
-    image: '/images/hospital2.png',
-    rating: 4.8,
-    reviews: 214,
-    distance: '2.5 km',
-    location: 'Montmartre, Paris',
-    languages: ['English', 'Spanish'],
-    fee: '$55',
-    specialties: ['Surgical', 'Pediatrics'],
-    openNow: true,
-  },
-  {
-    id: 3,
-    name: 'Unity Advanced Hospital',
-    image: '/images/hospital3.png',
-    rating: 4.7,
-    reviews: 198,
-    distance: '3.8 km',
-    location: 'Le Marais, Paris',
-    languages: ['English'],
-    fee: '$70',
-    specialties: ['Oncology', 'Diagnosis'],
-    openNow: false,
-  },
-  {
-    id: 4,
-    name: 'Meridian Wellness Clinic',
-    image: '/images/hospital1.png',
-    rating: 4.6,
-    reviews: 145,
-    distance: '4.1 km',
-    location: 'Saint-Germain, Paris',
-    languages: ['English', 'German'],
-    fee: '$35',
-    specialties: ['General', 'Dermatology'],
-    openNow: true,
-  },
-];
+import useFetch from '../hooks/useFetch';
+import { fetchHospitals } from '../services/api';
 
 const mapPins = [
   { id: 1, x: '25%', y: '35%', name: 'Global Health' },
@@ -68,6 +15,9 @@ const HospitalList = () => {
   const [selectedRating, setSelectedRating] = useState(null);
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [activePin, setActivePin] = useState(null);
+
+  const { data: hospitalsData, loading, error } = useFetch(fetchHospitals);
+  const hospitals = hospitalsData || [];
 
   const toggleLanguage = (lang) => {
     setSelectedLanguages(prev =>
@@ -183,67 +133,82 @@ const HospitalList = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {hospitals.map((h) => (
-            <div key={h.id} className="bg-white rounded-2xl shadow-sm hover:shadow-md border border-gray-50 overflow-hidden transition-all group">
-              {/* Card Image */}
-              <div className="relative h-44 overflow-hidden">
-                <img src={h.image} alt={h.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                {/* Rating Badge */}
-                <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow">
-                  <Star size={13} className="fill-amber-400 text-amber-400" />
-                  <span className="text-sm font-bold text-gray-800">{h.rating}</span>
-                  <span className="text-xs text-gray-400">({h.reviews})</span>
-                </div>
-                {/* Open / Closed Badge */}
-                <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold shadow ${h.openNow ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}`}>
-                  {h.openNow ? 'Open Now' : 'Closed'}
-                </div>
-              </div>
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="w-8 h-8 border-4 border-primary-blue border-t-transparent rounded-full animate-spin"></div>
+            <span className="ml-3 font-semibold text-gray-600">Loading facilities...</span>
+          </div>
+        )}
 
-              {/* Card Content */}
-              <div className="p-5">
-                <h3 className="font-bold text-gray-900 text-base leading-tight mb-2">{h.name}</h3>
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl text-center font-medium">
+            Failed to load facilities. Please try again later.
+          </div>
+        )}
 
-                <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                  <span className="flex items-center gap-1">
-                    <Navigation size={13} className="text-primary-blue" />
-                    {h.distance}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MapPin size={13} className="text-primary-blue" />
-                    {h.location}
-                  </span>
-                </div>
-
-                {/* Language Tags */}
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {h.languages.map(lang => (
-                    <span key={lang} className="text-[11px] font-bold px-2.5 py-1 bg-blue-50 text-primary-blue rounded-md">
-                      {lang}
-                    </span>
-                  ))}
-                  {h.specialties.map(spec => (
-                    <span key={spec} className="text-[11px] font-bold px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md">
-                      {spec}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                  <div>
-                    <p className="text-[11px] text-gray-400 font-medium">Consultation from</p>
-                    <p className="text-lg font-extrabold text-gray-900">{h.fee}</p>
+        {!loading && !error && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {hospitals.map((h) => (
+              <div key={h.id} className="bg-white rounded-2xl shadow-sm hover:shadow-md border border-gray-50 overflow-hidden transition-all group">
+                {/* Card Image */}
+                <div className="relative h-44 overflow-hidden">
+                  <img src={h.image} alt={h.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {/* Rating Badge */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow">
+                    <Star size={13} className="fill-amber-400 text-amber-400" />
+                    <span className="text-sm font-bold text-gray-800">{h.rating}</span>
+                    <span className="text-xs text-gray-400">({h.reviews})</span>
                   </div>
-                  <button className="flex items-center gap-2 bg-primary-blue text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-hover transition-all shadow-sm">
-                    <Phone size={15} />
-                    Call
-                  </button>
+                  {/* Open / Closed Badge */}
+                  <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold shadow ${h.openNow ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}`}>
+                    {h.openNow ? 'Open Now' : 'Closed'}
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="p-5">
+                  <h3 className="font-bold text-gray-900 text-base leading-tight mb-2">{h.name}</h3>
+
+                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                    <span className="flex items-center gap-1">
+                      <Navigation size={13} className="text-primary-blue" />
+                      {h.distance}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MapPin size={13} className="text-primary-blue" />
+                      {h.location}
+                    </span>
+                  </div>
+
+                  {/* Language Tags */}
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {h.languages.map(lang => (
+                      <span key={lang} className="text-[11px] font-bold px-2.5 py-1 bg-blue-50 text-primary-blue rounded-md">
+                        {lang}
+                      </span>
+                    ))}
+                    {h.specialties.map(spec => (
+                      <span key={spec} className="text-[11px] font-bold px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md">
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                    <div>
+                      <p className="text-[11px] text-gray-400 font-medium">Consultation from</p>
+                      <p className="text-lg font-extrabold text-gray-900">{h.fee}</p>
+                    </div>
+                    <button className="flex items-center gap-2 bg-primary-blue text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-hover transition-all shadow-sm">
+                      <Phone size={15} />
+                      Call
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
 
       {/* RIGHT — Map Placeholder */}

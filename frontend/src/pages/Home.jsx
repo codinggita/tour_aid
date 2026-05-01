@@ -2,6 +2,8 @@ import {
   Search, MapPin, ChevronDown, Stethoscope, HeartPulse, 
   Eye, Pill, Baby, Activity, Star, BadgeCheck 
 } from 'lucide-react';
+import useFetch from '../hooks/useFetch';
+import { fetchHospitals } from '../services/api';
 
 const Home = () => {
   const avatars = [
@@ -23,32 +25,8 @@ const Home = () => {
     { icon: <Activity size={24} />, label: 'Check-up' },
   ];
 
-  const featuredFacilities = [
-    {
-      id: 1,
-      name: 'Global Health Medical Center',
-      image: '/images/hospital1.png',
-      rating: 4.9,
-      tags: ['Multi-specialty', '24/7'],
-      verified: true,
-    },
-    {
-      id: 2,
-      name: 'St. Mary’s Specialty Clinic',
-      image: '/images/hospital2.png',
-      rating: 4.8,
-      tags: ['Surgical', 'Pediatrics'],
-      verified: true,
-    },
-    {
-      id: 3,
-      name: 'Unity Advanced Hospital',
-      image: '/images/hospital3.png',
-      rating: 4.7,
-      tags: ['Oncology', 'Diagnosis'],
-      verified: true,
-    },
-  ];
+  const { data: allHospitals, loading, error } = useFetch(fetchHospitals);
+  const featuredFacilities = allHospitals ? allHospitals.slice(0, 3) : [];
 
   return (
     <div className="flex flex-col pt-12 pb-20 space-y-24">
@@ -150,54 +128,69 @@ const Home = () => {
           </div>
           <button className="text-primary-blue font-bold hover:underline">View All</button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredFacilities.map((hospital) => (
-            <div 
-              key={hospital.id}
-              className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-gray-50 group"
-            >
-              {/* Card Image */}
-              <div className="relative h-56 overflow-hidden">
-                <img 
-                  src={hospital.image} 
-                  alt={hospital.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {hospital.verified && (
+        
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="w-8 h-8 border-4 border-primary-blue border-t-transparent rounded-full animate-spin"></div>
+            <span className="ml-3 font-semibold text-gray-600">Loading facilities...</span>
+          </div>
+        )}
+        
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl text-center font-medium">
+            Failed to load facilities. Please try again later.
+          </div>
+        )}
+
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredFacilities.map((hospital) => (
+              <div 
+                key={hospital.id}
+                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-gray-50 group"
+              >
+                {/* Card Image */}
+                <div className="relative h-56 overflow-hidden">
+                  <img 
+                    src={hospital.image} 
+                    alt={hospital.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {/* Mocking verified for display purposes */}
                   <div className="absolute top-4 left-4 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
                     <BadgeCheck size={16} className="text-green-500" />
                     <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">Verified</span>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Card Content */}
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-bold text-lg text-gray-900 leading-tight">
-                    {hospital.name}
-                  </h3>
-                  <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg">
-                    <Star size={14} className="fill-amber-400 text-amber-400" />
-                    <span className="text-sm font-bold text-amber-600">{hospital.rating}</span>
+                {/* Card Content */}
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-bold text-lg text-gray-900 leading-tight">
+                      {hospital.name}
+                    </h3>
+                    <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg">
+                      <Star size={14} className="fill-amber-400 text-amber-400" />
+                      <span className="text-sm font-bold text-amber-600">{hospital.rating}</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {hospital.tags.map((tag) => (
-                    <span key={tag} className="text-[11px] font-bold px-3 py-1 bg-gray-100 text-gray-600 rounded-md">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {hospital.specialties?.slice(0, 3).map((tag) => (
+                      <span key={tag} className="text-[11px] font-bold px-3 py-1 bg-gray-100 text-gray-600 rounded-md">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
 
-                <button className="w-full py-3.5 bg-white border-2 border-primary-blue text-primary-blue rounded-2xl font-bold hover:bg-primary-blue hover:text-white transition-all shadow-sm hover:shadow-blue-100">
-                  Book Appointment
-                </button>
+                  <button className="w-full py-3.5 bg-white border-2 border-primary-blue text-primary-blue rounded-2xl font-bold hover:bg-primary-blue hover:text-white transition-all shadow-sm hover:shadow-blue-100">
+                    Book Appointment
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
