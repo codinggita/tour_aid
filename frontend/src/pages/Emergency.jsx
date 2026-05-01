@@ -2,8 +2,11 @@ import {
   AlertTriangle, Phone, Navigation, Shield, 
   MapPin, Clock, ArrowRight, Languages 
 } from 'lucide-react';
+import useFetch from '../hooks/useFetch';
+import { fetchEmergencyNumbers } from '../services/api';
 
 const Emergency = () => {
+  const { data: numbers, loading, error } = useFetch(fetchEmergencyNumbers);
   const nearbyHospitals = [
     {
       id: 1,
@@ -119,35 +122,41 @@ const Emergency = () => {
             {/* 3. Emergency Contacts Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h3 className="font-bold text-lg mb-4">Emergency Numbers</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between pb-4 border-b border-gray-50">
-                  <div>
-                    <p className="font-semibold text-gray-900">National Emergency</p>
-                    <p className="text-sm text-gray-500">Ambulance, Fire, Police</p>
+              
+              {loading && <p className="text-sm text-gray-500 font-medium">Loading numbers...</p>}
+              {error && <p className="text-sm text-red-500 font-medium">Failed to load numbers</p>}
+              
+              {!loading && !error && numbers && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-4 border-b border-gray-50">
+                    <div>
+                      <p className="font-semibold text-gray-900">Ambulance</p>
+                      <p className="text-lg font-bold text-red-600 mt-0.5">{numbers.ambulance}</p>
+                    </div>
+                    <button className="bg-red-50 text-red-600 p-3 rounded-full hover:bg-red-100 transition-colors">
+                      <Phone size={20} />
+                    </button>
                   </div>
-                  <button className="bg-red-50 text-red-600 p-3 rounded-full hover:bg-red-100 transition-colors">
-                    <Phone size={20} />
-                  </button>
-                </div>
-                <div className="flex items-center justify-between pb-4 border-b border-gray-50">
-                  <div>
-                    <p className="font-semibold text-gray-900">Poison Control</p>
-                    <p className="text-sm text-gray-500">24/7 Helpline</p>
+                  <div className="flex items-center justify-between pb-4 border-b border-gray-50">
+                    <div>
+                      <p className="font-semibold text-gray-900">Police</p>
+                      <p className="text-lg font-bold text-primary-blue mt-0.5">{numbers.police}</p>
+                    </div>
+                    <button className="bg-blue-50 text-primary-blue p-3 rounded-full hover:bg-blue-100 transition-colors">
+                      <Phone size={20} />
+                    </button>
                   </div>
-                  <button className="bg-blue-50 text-primary-blue p-3 rounded-full hover:bg-blue-100 transition-colors">
-                    <Phone size={20} />
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-900">Tourist Police</p>
-                    <p className="text-sm text-gray-500">Special assistance</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-gray-900">Fire Brigade</p>
+                      <p className="text-lg font-bold text-orange-600 mt-0.5">{numbers.fire}</p>
+                    </div>
+                    <button className="bg-orange-50 text-orange-600 p-3 rounded-full hover:bg-orange-100 transition-colors">
+                      <Phone size={20} />
+                    </button>
                   </div>
-                  <button className="bg-blue-50 text-primary-blue p-3 rounded-full hover:bg-blue-100 transition-colors">
-                    <Phone size={20} />
-                  </button>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* 6. Optional CTA to translator */}

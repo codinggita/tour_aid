@@ -1,11 +1,36 @@
 import { MapPin, Star, CheckCircle2, Clock, Phone, Navigation, ShieldCheck, Globe, Activity, HeartPulse, Info, Map, ChevronRight, Calendar } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import useFetch from '../hooks/useFetch';
+import { fetchHospitalById } from '../services/api';
 
 const HospitalDetail = () => {
+  const { id } = useParams();
+  const { data: hospital, loading, error } = useFetch(() => fetchHospitalById(id || 1), [id]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-primary-blue border-t-transparent rounded-full animate-spin"></div>
+        <span className="ml-3 font-bold text-gray-600">Loading details...</span>
+      </div>
+    );
+  }
+
+  if (error || !hospital) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <div className="bg-red-50 text-red-600 p-8 rounded-2xl font-bold">
+          Failed to load hospital details. Please try again later.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Banner Section */}
       <div className="relative rounded-3xl overflow-hidden h-96 mb-8 shadow-sm border border-gray-100 group">
-        <img src="/images/hospital1.png" alt="Hospital Banner" className="w-full h-full object-cover" />
+        <img src={hospital.image} alt={hospital.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent"></div>
         <div className="absolute bottom-0 left-0 p-8 text-white w-full">
           <div className="flex items-center gap-2 mb-3">
@@ -13,13 +38,13 @@ const HospitalDetail = () => {
               <ShieldCheck size={14} /> Verified Facility
             </span>
             <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 backdrop-blur-md">
-              <Star size={14} className="fill-amber-400 text-amber-400" /> 4.9 Top Rated
+              <Star size={14} className="fill-amber-400 text-amber-400" /> {hospital.rating} Top Rated
             </span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">Global Health Medical Center</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">{hospital.name}</h1>
           <div className="flex items-center gap-2 text-gray-200 text-sm font-medium">
             <MapPin size={16} className="text-blue-400" />
-            123 Avenue des Champs-Élysées, 75008 Paris, France
+            {hospital.address}
           </div>
         </div>
       </div>
@@ -43,7 +68,7 @@ const HospitalDetail = () => {
               <Activity size={20} className="text-primary-blue" /> Medical Specialties
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'General Surgery', 'Oncology'].map((spec) => (
+              {(hospital.specialties?.length ? hospital.specialties : ['General']).map((spec) => (
                 <div key={spec} className="flex items-center gap-3 p-3 rounded-xl bg-blue-50/50 border border-blue-100/50 hover:border-primary-blue/30 transition-colors">
                   <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm text-primary-blue shrink-0">
                     <HeartPulse size={18} />
@@ -60,7 +85,7 @@ const HospitalDetail = () => {
               <Globe size={20} className="text-primary-blue" /> Languages Spoken
             </h2>
             <div className="flex flex-wrap gap-3">
-              {['English', 'French', 'Spanish', 'German', 'Mandarin', 'Arabic'].map((lang) => (
+              {(hospital.languages?.length ? hospital.languages : ['English']).map((lang) => (
                 <span key={lang} className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-100 transition-colors cursor-default">
                   {lang}
                 </span>
@@ -88,11 +113,11 @@ const HospitalDetail = () => {
         <div className="w-full lg:w-1/3 flex flex-col gap-6">
           {/* Status Card & Actions */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-6 bg-green-50 border border-green-100 p-4 rounded-xl">
-              <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
+            <div className={`flex items-center gap-3 mb-6 ${hospital.openNow ? 'bg-green-50 border-green-100' : 'bg-gray-100 border-gray-200'} p-4 rounded-xl`}>
+              <div className={`w-3 h-3 rounded-full ${hospital.openNow ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse' : 'bg-gray-400'}`}></div>
               <div>
-                <p className="text-green-700 font-bold">Open 24/7</p>
-                <p className="text-green-600 text-xs font-medium">Currently receiving patients</p>
+                <p className={`${hospital.openNow ? 'text-green-700' : 'text-gray-700'} font-bold`}>{hospital.openNow ? 'Open Now' : 'Closed'}</p>
+                <p className={`${hospital.openNow ? 'text-green-600' : 'text-gray-500'} text-xs font-medium`}>{hospital.openNow ? 'Currently receiving patients' : 'Check visiting hours'}</p>
               </div>
             </div>
 
@@ -121,14 +146,14 @@ const HospitalDetail = () => {
                 <Phone size={18} className="text-gray-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-gray-800">Emergency Contact</p>
-                  <p className="text-sm text-primary-blue font-bold mt-0.5">+33 1 23 45 67 89</p>
+                  <p className="text-sm text-primary-blue font-bold mt-0.5">{hospital.contactNumber || '+33 1 23 45 67 89'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Globe size={18} className="text-gray-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-gray-800">Website</p>
-                  <p className="text-sm text-primary-blue font-bold mt-0.5 hover:underline cursor-pointer">globalhealth.fr</p>
+                  <p className="text-sm text-primary-blue font-bold mt-0.5 hover:underline cursor-pointer">{hospital.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com</p>
                 </div>
               </div>
             </div>
