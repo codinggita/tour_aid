@@ -1,9 +1,9 @@
+import { useState, useEffect } from 'react';
 import { 
   Search, MapPin, ChevronDown, Stethoscope, HeartPulse, 
   Eye, Pill, Baby, Activity, Star, BadgeCheck 
 } from 'lucide-react';
-import useFetch from '../hooks/useFetch';
-import { fetchHospitals } from '../services/api';
+import hospitalService from '../services/hospitalService';
 
 const Home = () => {
   const avatars = [
@@ -25,8 +25,32 @@ const Home = () => {
     { icon: <Activity size={24} />, label: 'Check-up' },
   ];
 
-  const { data: allHospitals, loading, error } = useFetch(fetchHospitals);
-  const featuredFacilities = allHospitals ? allHospitals.slice(0, 3) : [];
+  const [hospitals, setHospitals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchText, setSearchText] = useState('');
+
+  const fetchHospitalsData = async (city = '') => {
+    try {
+      setLoading(true);
+      const data = await hospitalService.getHospitals(city);
+      setHospitals(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load facilities. Please try again later.');
+      console.error("Error fetching hospitals:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHospitalsData();
+  }, []);
+
+  const handleSearchClick = () => {
+    fetchHospitalsData(searchText);
+  };
 
   return (
     <div className="flex flex-col pt-12 pb-20 space-y-24">
@@ -49,7 +73,10 @@ const Home = () => {
               <MapPin className="text-primary-blue" size={22} />
               <input 
                 type="text" 
-                placeholder="Search by city, hospital or specialty..." 
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
+                placeholder="Search by city..." 
                 className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400 font-medium"
               />
             </div>
@@ -57,7 +84,9 @@ const Home = () => {
               <span className="w-2 h-2 bg-primary-blue rounded-full animate-pulse"></span>
               Use My Location
             </button>
-            <button className="w-full md:w-auto bg-primary-blue text-white px-10 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-primary-hover hover:-translate-y-0.5 transition-all active:translate-y-0 flex items-center justify-center gap-2">
+            <button 
+              onClick={handleSearchClick}
+              className="w-full md:w-auto bg-primary-blue text-white px-10 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-primary-hover hover:-translate-y-0.5 transition-all active:translate-y-0 flex items-center justify-center gap-2">
               <Search size={20} />
               Search
             </button>
@@ -142,9 +171,15 @@ const Home = () => {
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && !error && hospitals.length === 0 && (
+          <div className="bg-gray-50 text-gray-500 p-8 rounded-xl text-center font-medium">
+            No hospitals found
+          </div>
+        )}
+
+        {!loading && !error && hospitals.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredFacilities.map((hospital) => (
+            {hospitals.map((hospital) => (
               <div 
                 key={hospital.id}
                 className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-gray-50 group"
