@@ -21,9 +21,13 @@ const mapHospitalData = (h) => ({
 const getHospitals = async (params = {}) => {
     let url = `${API_URL}/hospitals`;
     const queryParams = [];
-    if (params.city) queryParams.push(`city=${encodeURIComponent(params.city)}`);
     if (params.lat && params.lng) {
         queryParams.push(`lat=${params.lat}&lng=${params.lng}`);
+    } else if (params.city) {
+        queryParams.push(`city=${encodeURIComponent(params.city)}`);
+    }
+    if (params.language) {
+        queryParams.push(`language=${encodeURIComponent(params.language)}`);
     }
     if (queryParams.length > 0) {
         url += `?${queryParams.join('&')}`;

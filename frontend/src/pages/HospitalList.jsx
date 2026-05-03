@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Phone, MapPin, Star, ChevronDown, Map, Navigation } from 'lucide-react';
-import useFetch from '../hooks/useFetch';
-import { fetchHospitals } from '../services/api';
+import hospitalService from '../services/hospitalService';
 
 const mapPins = [
   { id: 1, x: '25%', y: '35%', name: 'Global Health' },
@@ -13,17 +12,28 @@ const mapPins = [
 const HospitalList = () => {
   const [openNow, setOpenNow] = useState(false);
   const [selectedRating, setSelectedRating] = useState(null);
-  const [selectedLanguages, setSelectedLanguages] = useState([]);
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [activePin, setActivePin] = useState(null);
+  const [hospitals, setHospitals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const { data: hospitalsData, loading, error } = useFetch(fetchHospitals);
-  const hospitals = hospitalsData || [];
-
-  const toggleLanguage = (lang) => {
-    setSelectedLanguages(prev =>
-      prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang]
-    );
-  };
+  useEffect(() => {
+    const fetchHospitalsData = async () => {
+      try {
+        setLoading(true);
+        const data = await hospitalService.getHospitals({ language: selectedLanguage });
+        setHospitals(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load facilities. Please try again later.');
+        console.error("Error fetching hospitals:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHospitalsData();
+  }, [selectedLanguage]);
 
   return (
     <div className="flex gap-6 h-[calc(100vh-70px-4rem)]">
@@ -35,18 +45,17 @@ const HospitalList = () => {
         {/* Language */}
         <div>
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Language</h3>
-          <div className="flex flex-col gap-2">
-            {['English', 'French', 'Spanish', 'German'].map(lang => (
-              <label key={lang} className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={selectedLanguages.includes(lang)}
-                  onChange={() => toggleLanguage(lang)}
-                  className="w-4 h-4 accent-primary-blue rounded"
-                />
-                <span className="text-sm text-gray-600 group-hover:text-primary-blue font-medium transition-colors">{lang}</span>
-              </label>
-            ))}
+          <div className="relative group">
+            <select 
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-medium pr-8 focus:outline-none focus:border-primary-blue cursor-pointer"
+            >
+              <option value="English">English speaking</option>
+              <option value="Hindi">Hindi speaking</option>
+              <option value="Gujarati">Gujarati speaking</option>
+            </select>
+            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary-blue pointer-events-none" />
           </div>
         </div>
 
@@ -119,7 +128,7 @@ const HospitalList = () => {
       {/* CENTER — Hospital Cards */}
       <main className="flex-1 overflow-y-auto pr-1">
         <div className="flex items-center justify-between mb-5">
-          <p className="text-gray-500 font-medium"><span className="text-gray-900 font-bold">{hospitals.length} facilities</span> found near you</p>
+          <p className="text-gray-500 font-medium">Showing {selectedLanguage}-speaking hospitals: <span className="text-gray-900 font-bold">{hospitals.length} facilities</span> found</p>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             Sort by:
             <div className="relative">
@@ -146,7 +155,13 @@ const HospitalList = () => {
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && !error && hospitals.length === 0 && (
+          <div className="bg-gray-50 text-gray-500 p-8 rounded-xl text-center font-medium mt-4">
+            No hospitals found for selected language
+          </div>
+        )}
+
+        {!loading && !error && hospitals.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {hospitals.map((h) => (
               <div key={h.id} className="bg-white rounded-2xl shadow-sm hover:shadow-md border border-gray-50 overflow-hidden transition-all group">
