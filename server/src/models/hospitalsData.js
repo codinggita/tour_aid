@@ -9,7 +9,9 @@ const hospitals = [
     specialties: ["Cardiology", "Neurology", "Oncology", "Orthopedics", "Pediatrics"],
     isOpen: true,
     consultationFee: 500,
-    contactNumber: "+91-11-26588500"
+    contactNumber: "+91-11-26588500",
+    rating: 4.8,
+    reviews: 320
   },
   {
     id: 2,
@@ -21,7 +23,9 @@ const hospitals = [
     specialties: ["Cardiac Sciences", "Neurosciences", "Orthopedics", "Emergency Care"],
     isOpen: true,
     consultationFee: 1500,
-    contactNumber: "+91-11-29871090"
+    contactNumber: "+91-11-29871090",
+    rating: 4.6,
+    reviews: 210
   },
   {
     id: 3,
@@ -33,7 +37,9 @@ const hospitals = [
     specialties: ["Cardiology", "Gastroenterology", "Orthopedics", "Pediatrics"],
     isOpen: true,
     consultationFee: 1200,
-    contactNumber: "+91-22-26751000"
+    contactNumber: "+91-22-26751000",
+    rating: 4.7,
+    reviews: 450
   },
   {
     id: 4,
@@ -45,7 +51,9 @@ const hospitals = [
     specialties: ["Robotic Surgery", "Oncology", "Neurology", "Cardiac Sciences"],
     isOpen: true,
     consultationFee: 2000,
-    contactNumber: "+91-22-30999999"
+    contactNumber: "+91-22-30999999",
+    rating: 4.9,
+    reviews: 600
   },
   {
     id: 5,
@@ -57,7 +65,9 @@ const hospitals = [
     specialties: ["Cardiology", "Neurology", "Orthopedics", "Urology"],
     isOpen: true,
     consultationFee: 1000,
-    contactNumber: "+91-79-66701800"
+    contactNumber: "+91-79-66701800",
+    rating: 4.5,
+    reviews: 150
   },
   {
     id: 6,
@@ -69,7 +79,9 @@ const hospitals = [
     specialties: ["Critical Care", "Gastroenterology", "Neurology", "Cardiology"],
     isOpen: true,
     consultationFee: 1200,
-    contactNumber: "+91-79-66190201"
+    contactNumber: "+91-79-66190201",
+    rating: 4.4,
+    reviews: 110
   },
   {
     id: 7,
@@ -81,7 +93,9 @@ const hospitals = [
     specialties: ["Cardiology", "Urology", "Orthopedics", "Oncology"],
     isOpen: true,
     consultationFee: 800,
-    contactNumber: "+91-80-66214444"
+    contactNumber: "+91-80-66214444",
+    rating: 4.6,
+    reviews: 280
   },
   {
     id: 8,
@@ -93,7 +107,9 @@ const hospitals = [
     specialties: ["Organ Transplant", "Oncology", "Cardiology", "Neurology"],
     isOpen: true,
     consultationFee: 1000,
-    contactNumber: "+91-80-25023222"
+    contactNumber: "+91-80-25023222",
+    rating: 4.8,
+    reviews: 400
   }
 ];
 

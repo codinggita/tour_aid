@@ -6,8 +6,9 @@ const mapHospitalData = (h) => ({
   id: h._id || h.id,
   name: h.name,
   image: `/images/hospital${((String(h._id || h.id || "1").charCodeAt(0)) % 3) + 1}.png`,
-  rating: (4 + Math.random()).toFixed(1),
-  reviews: Math.floor(Math.random() * 500) + 50,
+  rating: h.rating || (4 + Math.random()).toFixed(1),
+  reviews: h.reviews || Math.floor(Math.random() * 500) + 50,
+  coordinates: h.coordinates || null,
   distance: h.distance,
   location: `${h.city}, ${h.address?.split(',').slice(-2, -1)[0]?.trim() || h.city}`,
   languages: h.languages || [],
@@ -28,6 +29,15 @@ const getHospitals = async (params = {}) => {
     }
     if (params.language) {
         queryParams.push(`language=${encodeURIComponent(params.language)}`);
+    }
+    if (params.rating) {
+        queryParams.push(`rating=${encodeURIComponent(params.rating)}`);
+    }
+    if (params.sortBy) {
+        queryParams.push(`sortBy=${encodeURIComponent(params.sortBy)}`);
+    }
+    if (params.specialty) {
+        queryParams.push(`specialty=${encodeURIComponent(params.specialty)}`);
     }
     if (queryParams.length > 0) {
         url += `?${queryParams.join('&')}`;
