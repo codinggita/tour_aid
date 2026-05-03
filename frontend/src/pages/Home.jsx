@@ -29,11 +29,13 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchText, setSearchText] = useState('');
+  const [location, setLocation] = useState({ lat: null, lng: null });
+  const [locationMessage, setLocationMessage] = useState('');
 
-  const fetchHospitalsData = async (city = '') => {
+  const fetchHospitalsData = async (params = {}) => {
     try {
       setLoading(true);
-      const data = await hospitalService.getHospitals(city);
+      const data = await hospitalService.getHospitals(params);
       setHospitals(data);
       setError(null);
     } catch (err) {
@@ -45,11 +47,34 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchHospitalsData();
+    fetchHospitalsData({});
   }, []);
 
   const handleSearchClick = () => {
-    fetchHospitalsData(searchText);
+    setLocationMessage('');
+    fetchHospitalsData({ city: searchText });
+  };
+
+  const handleUseLocation = () => {
+    if ("geolocation" in navigator) {
+      setLocationMessage('');
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setLocation({ lat, lng });
+          setSearchText('');
+          setLocationMessage('Showing nearby hospitals');
+          fetchHospitalsData({ lat, lng });
+        },
+        (err) => {
+          console.error("Error getting location:", err);
+          setLocationMessage('Location access denied');
+        }
+      );
+    } else {
+      setLocationMessage('Location access denied');
+    }
   };
 
   return (
@@ -80,7 +105,9 @@ const Home = () => {
                 className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400 font-medium"
               />
             </div>
-            <button className="flex items-center gap-2 px-5 py-3 text-primary-blue font-semibold hover:bg-blue-50 rounded-2xl transition-all whitespace-nowrap">
+            <button 
+              onClick={handleUseLocation}
+              className="flex items-center gap-2 px-5 py-3 text-primary-blue font-semibold hover:bg-blue-50 rounded-2xl transition-all whitespace-nowrap">
               <span className="w-2 h-2 bg-primary-blue rounded-full animate-pulse"></span>
               Use My Location
             </button>
@@ -92,6 +119,12 @@ const Home = () => {
             </button>
           </div>
         </div>
+
+        {locationMessage && (
+          <div className={`mb-6 text-sm font-semibold ${locationMessage === 'Location access denied' ? 'text-red-500' : 'text-green-600'}`}>
+            {locationMessage}
+          </div>
+        )}
 
         {/* Filter Tags */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
@@ -209,6 +242,13 @@ const Home = () => {
                       <span className="text-sm font-bold text-amber-600">{hospital.rating}</span>
                     </div>
                   </div>
+
+                  {location.lat && location.lng && hospital.distance !== undefined && hospital.distance !== null && (
+                    <div className="flex items-center gap-1 mb-3 text-primary-blue">
+                      <MapPin size={14} />
+                      <span className="text-sm font-bold">{Number(hospital.distance).toFixed(1)} km away</span>
+                    </div>
+                  )}
 
                   <div className="flex flex-wrap gap-2 mb-6">
                     {hospital.specialties?.slice(0, 3).map((tag) => (

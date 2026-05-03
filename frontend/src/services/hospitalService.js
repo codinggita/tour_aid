@@ -8,7 +8,7 @@ const mapHospitalData = (h) => ({
   image: `/images/hospital${((String(h._id || h.id || "1").charCodeAt(0)) % 3) + 1}.png`,
   rating: (4 + Math.random()).toFixed(1),
   reviews: Math.floor(Math.random() * 500) + 50,
-  distance: `${(Math.random() * 5 + 1).toFixed(1)} km`,
+  distance: h.distance,
   location: `${h.city}, ${h.address?.split(',').slice(-2, -1)[0]?.trim() || h.city}`,
   languages: h.languages || [],
   fee: `₹${h.consultationFee}`,
@@ -18,8 +18,16 @@ const mapHospitalData = (h) => ({
   address: h.address
 });
 
-const getHospitals = async (city = '') => {
-    const url = city ? `${API_URL}/hospitals?city=${encodeURIComponent(city)}` : `${API_URL}/hospitals`;
+const getHospitals = async (params = {}) => {
+    let url = `${API_URL}/hospitals`;
+    const queryParams = [];
+    if (params.city) queryParams.push(`city=${encodeURIComponent(params.city)}`);
+    if (params.lat && params.lng) {
+        queryParams.push(`lat=${params.lat}&lng=${params.lng}`);
+    }
+    if (queryParams.length > 0) {
+        url += `?${queryParams.join('&')}`;
+    }
     const response = await axios.get(url);
     return response.data.map(mapHospitalData);
 };
