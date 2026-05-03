@@ -1,10 +1,19 @@
 const hospitals = require('../models/hospitalsData');
 
-const getAllHospitals = (city) => {
-  if (city) {
-    return hospitals.filter(h => h.city.toLowerCase() === city.toLowerCase());
+const getAllHospitals = (query = {}) => {
+  let results = hospitals;
+  
+  if (query.city) {
+    results = results.filter(h => h.city.toLowerCase() === query.city.toLowerCase());
   }
-  return hospitals;
+
+  if (query.language) {
+    results = results.filter(h => 
+      h.languages && h.languages.includes(query.language)
+    );
+  }
+  
+  return results;
 };
 
 const getHospitalById = (id) => {

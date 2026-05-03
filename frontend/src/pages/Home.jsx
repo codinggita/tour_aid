@@ -31,11 +31,13 @@ const Home = () => {
   const [searchText, setSearchText] = useState('');
   const [location, setLocation] = useState({ lat: null, lng: null });
   const [locationMessage, setLocationMessage] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
 
   const fetchHospitalsData = async (params = {}) => {
     try {
       setLoading(true);
-      const data = await hospitalService.getHospitals(params);
+      const queryParams = { language: params.language || selectedLanguage, ...params };
+      const data = await hospitalService.getHospitals(queryParams);
       setHospitals(data);
       setError(null);
     } catch (err) {
@@ -128,7 +130,29 @@ const Home = () => {
 
         {/* Filter Tags */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-          {filters.map((filter) => (
+          <div className="relative group">
+            <select 
+              value={selectedLanguage}
+              onChange={(e) => {
+                const newLang = e.target.value;
+                setSelectedLanguage(newLang);
+                if (location.lat) {
+                  fetchHospitalsData({ language: newLang, lat: location.lat, lng: location.lng });
+                } else if (searchText) {
+                  fetchHospitalsData({ language: newLang, city: searchText });
+                } else {
+                  fetchHospitalsData({ language: newLang });
+                }
+              }}
+              className="appearance-none flex items-center gap-2 px-5 py-2.5 pr-10 bg-white border border-gray-200 rounded-full text-sm font-semibold text-gray-600 hover:border-primary-blue hover:text-primary-blue hover:bg-blue-50 transition-all shadow-sm focus:outline-none cursor-pointer"
+            >
+              <option value="English">English speaking</option>
+              <option value="Hindi">Hindi speaking</option>
+              <option value="Gujarati">Gujarati speaking</option>
+            </select>
+            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary-blue pointer-events-none" />
+          </div>
+          {['Hospital Type', 'Within 10km'].map((filter) => (
             <button 
               key={filter}
               className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-full text-sm font-semibold text-gray-600 hover:border-primary-blue hover:text-primary-blue hover:bg-blue-50 transition-all shadow-sm group"
@@ -186,7 +210,7 @@ const Home = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Featured Medical Facilities</h2>
-            <p className="text-gray-500 font-medium">Top-rated hospitals verified by TourAid</p>
+            <p className="text-gray-500 font-medium">Showing {selectedLanguage}-speaking hospitals</p>
           </div>
           <button className="text-primary-blue font-bold hover:underline">View All</button>
         </div>
@@ -206,7 +230,7 @@ const Home = () => {
 
         {!loading && !error && hospitals.length === 0 && (
           <div className="bg-gray-50 text-gray-500 p-8 rounded-xl text-center font-medium">
-            No hospitals found
+            No hospitals found for selected language
           </div>
         )}
 

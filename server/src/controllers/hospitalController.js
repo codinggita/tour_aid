@@ -2,8 +2,7 @@ const hospitalService = require('../services/hospitalService');
 
 const getHospitals = (req, res) => {
   try {
-    const { city } = req.query;
-    const hospitals = hospitalService.getAllHospitals(city);
+    const hospitals = hospitalService.getAllHospitals(req.query);
     res.status(200).json(hospitals);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching hospitals', error: error.message });
