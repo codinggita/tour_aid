@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import axios from 'axios';
 import { 
   ChevronDown, ChevronUp, Search, SlidersHorizontal, 
-  FileText, Navigation, Phone, Languages, HelpCircle, Mail, Send
+  FileText, Navigation, Phone, Languages, HelpCircle, Mail, Send, CheckCircle, AlertCircle
 } from 'lucide-react';
 
 const HelpSupport = () => {
@@ -28,6 +29,41 @@ const HelpSupport = () => {
 
   const toggleFaq = (id) => {
     setOpenFaq(openFaq === id ? null : id);
+  };
+
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) {
+      setSubmitStatus('error');
+      setStatusMessage('All fields are required.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    setStatusMessage('');
+
+    try {
+      const res = await axios.post('http://localhost:5000/api/support', formData);
+      setSubmitStatus('success');
+      setStatusMessage(res.data.message || 'Your message has been sent');
+      setFormData({ name: '', email: '', message: '' });
+    } catch (err) {
+      setSubmitStatus('error');
+      setStatusMessage(err.response?.data?.error || 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -150,33 +186,60 @@ const HelpSupport = () => {
               <Mail size={16} /> support@touraid.com
             </p>
             
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {submitStatus === 'success' && (
+                <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm font-semibold flex items-center gap-2 border border-green-200">
+                  <CheckCircle size={16} /> {statusMessage}
+                </div>
+              )}
+              {submitStatus === 'error' && (
+                <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm font-semibold flex items-center gap-2 border border-red-200">
+                  <AlertCircle size={16} /> {statusMessage}
+                </div>
+              )}
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input 
                   type="text" 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all"
                   placeholder="Your Name"
+                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input 
                   type="email" 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all"
                   placeholder="you@example.com"
+                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
                 <textarea 
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
                   rows="3"
                   className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all resize-none"
                   placeholder="How can we help?"
+                  required
                 ></textarea>
               </div>
-              <button className="w-full bg-primary-blue hover:bg-primary-hover text-white font-bold py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                Send Message <Send size={16} />
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-primary-blue hover:bg-primary-hover text-white font-bold py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+              >
+                {isSubmitting ? 'Sending...' : 'Send Message'} <Send size={16} />
               </button>
             </form>
           </section>
