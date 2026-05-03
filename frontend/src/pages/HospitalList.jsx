@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { Phone, MapPin, Star, ChevronDown, Map, Navigation } from 'lucide-react';
 import hospitalService from '../services/hospitalService';
 
-const mapPins = [
-  { id: 1, x: '25%', y: '35%', name: 'Global Health' },
-  { id: 2, x: '55%', y: '50%', name: "St. Mary's" },
-  { id: 3, x: '70%', y: '30%', name: 'Unity Advanced' },
-  { id: 4, x: '40%', y: '65%', name: 'Meridian' },
-];
-
 const HospitalList = () => {
   const [openNow, setOpenNow] = useState(false);
-  const [selectedRating, setSelectedRating] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [filters, setFilters] = useState({
+    language: 'English',
+    rating: null,
+    specialty: '',
+    sortBy: 'Closest',
+    lat: null,
+    lng: null,
+    city: ''
+  });
   const [activePin, setActivePin] = useState(null);
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ const HospitalList = () => {
     const fetchHospitalsData = async () => {
       try {
         setLoading(true);
-        const data = await hospitalService.getHospitals({ language: selectedLanguage });
+        const data = await hospitalService.getHospitals(filters);
         setHospitals(data);
         setError(null);
       } catch (err) {
@@ -33,22 +33,50 @@ const HospitalList = () => {
       }
     };
     fetchHospitalsData();
-  }, [selectedLanguage]);
+  }, [filters]);
+
+  const handleUseLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => setFilters(prev => ({ ...prev, lat: position.coords.latitude, lng: position.coords.longitude, city: '' })),
+        () => setFilters(prev => ({ ...prev, city: 'Delhi', lat: null, lng: null }))
+      );
+    } else {
+      setFilters(prev => ({ ...prev, city: 'Delhi', lat: null, lng: null }));
+    }
+  };
+
+  const clearFilters = () => {
+    setFilters({ language: '', rating: null, specialty: '', sortBy: 'Closest', lat: null, lng: null, city: '' });
+  };
+
+  const getFilterText = () => {
+    const parts = [];
+    if (filters.language) parts.push(`${filters.language}-speaking`);
+    if (filters.rating) parts.push(`${filters.rating}+ rated`);
+    if (filters.specialty) parts.push(filters.specialty);
+    return parts.length ? `Showing ${parts.join(', ')} hospitals` : 'Showing all hospitals';
+  };
 
   return (
     <div className="flex gap-6 h-[calc(100vh-70px-4rem)]">
 
       {/* LEFT SIDEBAR */}
       <aside className="w-64 shrink-0 bg-white rounded-2xl shadow-sm p-6 overflow-y-auto border border-gray-100 flex flex-col gap-6">
-        <h2 className="text-lg font-bold text-gray-900">Filters</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">Filters</h2>
+          <button onClick={handleUseLocation} className="text-xs font-bold text-primary-blue hover:underline flex items-center gap-1">
+            <Navigation size={12} /> Use My Location
+          </button>
+        </div>
 
         {/* Language */}
         <div>
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Language</h3>
           <div className="relative group">
             <select 
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
+              value={filters.language}
+              onChange={(e) => setFilters(prev => ({ ...prev, language: e.target.value }))}
               className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-medium pr-8 focus:outline-none focus:border-primary-blue cursor-pointer"
             >
               <option value="English">English speaking</option>
@@ -65,13 +93,16 @@ const HospitalList = () => {
         <div>
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Specialties</h3>
           <div className="relative">
-            <select className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-medium pr-8 focus:outline-none focus:border-primary-blue">
+            <select 
+              value={filters.specialty}
+              onChange={(e) => setFilters(prev => ({ ...prev, specialty: e.target.value }))}
+              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-medium pr-8 focus:outline-none focus:border-primary-blue cursor-pointer">
               <option value="">All Specialties</option>
-              <option value="cardiology">Cardiology</option>
-              <option value="pediatrics">Pediatrics</option>
-              <option value="surgical">Surgical</option>
-              <option value="oncology">Oncology</option>
-              <option value="general">General</option>
+              <option value="Cardiology">Cardiology</option>
+              <option value="Pediatrics">Pediatrics</option>
+              <option value="Orthopedics">Orthopedics</option>
+              <option value="Oncology">Oncology</option>
+              <option value="Neurology">Neurology</option>
             </select>
             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
@@ -86,14 +117,14 @@ const HospitalList = () => {
             {[4, 4.5, 4.7, 4.9].map(rating => (
               <button
                 key={rating}
-                onClick={() => setSelectedRating(rating === selectedRating ? null : rating)}
+                onClick={() => setFilters(prev => ({ ...prev, rating: filters.rating === rating ? null : rating }))}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold border transition-all ${
-                  selectedRating === rating
+                  filters.rating === rating
                     ? 'bg-primary-blue text-white border-primary-blue shadow-md'
                     : 'bg-white text-gray-600 border-gray-200 hover:border-primary-blue hover:text-primary-blue'
                 }`}
               >
-                <Star size={12} className={selectedRating === rating ? 'fill-white text-white' : 'fill-amber-400 text-amber-400'} />
+                <Star size={12} className={filters.rating === rating ? 'fill-white text-white' : 'fill-amber-400 text-amber-400'} />
                 {rating}+
               </button>
             ))}
@@ -120,7 +151,7 @@ const HospitalList = () => {
 
         <hr className="border-gray-100" />
 
-        <button className="w-full py-2.5 border border-gray-200 text-gray-500 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">
+        <button onClick={clearFilters} className="w-full py-2.5 border border-gray-200 text-gray-500 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">
           Clear All Filters
         </button>
       </aside>
@@ -128,14 +159,17 @@ const HospitalList = () => {
       {/* CENTER — Hospital Cards */}
       <main className="flex-1 overflow-y-auto pr-1">
         <div className="flex items-center justify-between mb-5">
-          <p className="text-gray-500 font-medium">Showing {selectedLanguage}-speaking hospitals: <span className="text-gray-900 font-bold">{hospitals.length} facilities</span> found</p>
+          <p className="text-gray-500 font-medium">{getFilterText()}: <span className="text-gray-900 font-bold">{hospitals.length} facilities</span> found</p>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             Sort by:
             <div className="relative">
-              <select className="appearance-none bg-white border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-sm font-semibold text-gray-700 focus:outline-none focus:border-primary-blue">
-                <option>Closest</option>
-                <option>Highest Rated</option>
-                <option>Lowest Fee</option>
+              <select 
+                value={filters.sortBy}
+                onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
+                className="appearance-none bg-white border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-sm font-semibold text-gray-700 focus:outline-none focus:border-primary-blue cursor-pointer">
+                <option value="Closest">Closest</option>
+                <option value="Rating (High to Low)">Highest Rated</option>
+                <option value="Lowest Fee">Lowest Fee</option>
               </select>
               <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
@@ -240,25 +274,38 @@ const HospitalList = () => {
             <span className="text-white text-sm font-bold">Live Map</span>
           </div>
 
-          {/* Static Map Pins */}
-          {mapPins.map(pin => (
-            <div
-              key={pin.id}
-              style={{ left: pin.x, top: pin.y }}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-              onMouseEnter={() => setActivePin(pin.id)}
-              onMouseLeave={() => setActivePin(null)}
-            >
-              <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center shadow-lg transition-all ${activePin === pin.id ? 'bg-amber-400 scale-125' : 'bg-primary-blue'}`}>
-                <MapPin size={14} className="text-white fill-white" />
-              </div>
-              {activePin === pin.id && (
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white rounded-xl px-3 py-2 shadow-xl text-xs font-bold text-gray-800 whitespace-nowrap">
-                  {pin.name}
+          {/* Dynamic Map Pins */}
+          {hospitals.map((h, i) => {
+            const staticPositions = [
+              { x: '25%', y: '35%' }, { x: '55%', y: '50%' }, 
+              { x: '70%', y: '30%' }, { x: '40%', y: '65%' },
+              { x: '80%', y: '75%' }, { x: '20%', y: '80%' },
+              { x: '50%', y: '20%' }, { x: '85%', y: '50%' }
+            ];
+            const pos = staticPositions[i % staticPositions.length];
+            const link = h.coordinates ? `https://www.google.com/maps?q=${h.coordinates.lat},${h.coordinates.lng}` : '#';
+            return (
+              <a
+                key={h.id}
+                href={link}
+                target="_blank"
+                rel="noreferrer"
+                style={{ left: pos.x, top: pos.y }}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10"
+                onMouseEnter={() => setActivePin(h.id)}
+                onMouseLeave={() => setActivePin(null)}
+              >
+                <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center shadow-lg transition-all ${activePin === h.id ? 'bg-amber-400 scale-125' : 'bg-primary-blue'}`}>
+                  <MapPin size={14} className="text-white fill-white" />
                 </div>
-              )}
-            </div>
-          ))}
+                {activePin === h.id && (
+                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white rounded-xl px-3 py-2 shadow-xl text-xs font-bold text-gray-800 whitespace-nowrap">
+                    {h.name}
+                  </div>
+                )}
+              </a>
+            );
+          })}
 
           {/* Bottom location tag */}
           <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow">
