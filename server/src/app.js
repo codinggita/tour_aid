@@ -3,6 +3,7 @@ const cors = require('cors');
 const { errorHandler } = require('./middlewares/errorMiddleware');
 const hospitalRoutes = require('./routes/hospitalRoutes');
 const emergencyRoutes = require('./routes/emergencyRoutes');
+const supportRoutes = require('./routes/supportRoutes');
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 app.use('/api/hospitals', hospitalRoutes);
 app.use('/api/emergency', emergencyRoutes);
+app.use('/api/support', supportRoutes);
 
 app.use(errorHandler);
 

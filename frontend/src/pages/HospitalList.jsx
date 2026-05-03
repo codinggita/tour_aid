@@ -1,6 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Phone, MapPin, Star, ChevronDown, Map, Navigation } from 'lucide-react';
 import hospitalService from '../services/hospitalService';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+const MapUpdater = ({ center, zoom }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.flyTo(center, zoom, { animate: true });
+    }
+  }, [center, zoom, map]);
+  return null;
+};
 
 const HospitalList = () => {
   const [openNow, setOpenNow] = useState(false);
@@ -261,58 +284,33 @@ const HospitalList = () => {
       </main>
 
       {/* RIGHT — Map Placeholder */}
-      <aside className="w-72 shrink-0 hidden xl:block">
-        <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-2xl shadow-lg h-full relative overflow-hidden">
-          {/* Map grid lines */}
-          <div className="absolute inset-0 opacity-10"
-            style={{ backgroundImage: 'repeating-linear-gradient(0deg, white 0px, white 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, white 0px, white 1px, transparent 1px, transparent 40px)' }}>
-          </div>
-
-          {/* Map label */}
-          <div className="absolute top-5 left-5 flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-xl">
-            <Map size={16} className="text-white" />
-            <span className="text-white text-sm font-bold">Live Map</span>
-          </div>
-
-          {/* Dynamic Map Pins */}
-          {hospitals.map((h, i) => {
-            const staticPositions = [
-              { x: '25%', y: '35%' }, { x: '55%', y: '50%' }, 
-              { x: '70%', y: '30%' }, { x: '40%', y: '65%' },
-              { x: '80%', y: '75%' }, { x: '20%', y: '80%' },
-              { x: '50%', y: '20%' }, { x: '85%', y: '50%' }
-            ];
-            const pos = staticPositions[i % staticPositions.length];
-            const link = h.coordinates ? `https://www.google.com/maps?q=${h.coordinates.lat},${h.coordinates.lng}` : '#';
-            return (
-              <a
-                key={h.id}
-                href={link}
-                target="_blank"
-                rel="noreferrer"
-                style={{ left: pos.x, top: pos.y }}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10"
-                onMouseEnter={() => setActivePin(h.id)}
-                onMouseLeave={() => setActivePin(null)}
-              >
-                <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center shadow-lg transition-all ${activePin === h.id ? 'bg-amber-400 scale-125' : 'bg-primary-blue'}`}>
-                  <MapPin size={14} className="text-white fill-white" />
-                </div>
-                {activePin === h.id && (
-                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white rounded-xl px-3 py-2 shadow-xl text-xs font-bold text-gray-800 whitespace-nowrap">
-                    {h.name}
-                  </div>
-                )}
-              </a>
-            );
-          })}
-
-          {/* Bottom location tag */}
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow">
-            <Navigation size={14} className="text-primary-blue" />
-            <span className="text-sm font-bold text-gray-700">Paris, France</span>
-          </div>
-        </div>
+      <aside className="w-72 shrink-0 hidden xl:block rounded-2xl shadow-lg relative overflow-hidden border border-gray-100 z-0">
+        <MapContainer 
+          center={[20.5937, 78.9629]} 
+          zoom={4} 
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={true}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <MapUpdater 
+            center={filters.lat && filters.lng ? [filters.lat, filters.lng] : [20.5937, 78.9629]} 
+            zoom={filters.lat && filters.lng ? 11 : 4} 
+          />
+          
+          {hospitals.map(h => h.coordinates && (
+            <Marker key={h.id} position={[h.coordinates.lat, h.coordinates.lng]}>
+              <Popup>
+                <div className="font-bold text-gray-900">{h.name}</div>
+                <div className="text-xs font-semibold text-primary-blue mt-1">⭐ {h.rating} ({h.reviews} reviews)</div>
+                <div className="text-xs text-gray-600 mt-1">{h.location}</div>
+                <div className="text-xs font-extrabold text-gray-900 mt-1">Fee: {h.fee}</div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
       </aside>
 
     </div>
