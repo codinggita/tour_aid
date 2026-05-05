@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../services/axiosInstance';
 import { 
   ChevronDown, ChevronUp, Search, SlidersHorizontal, 
   FileText, Navigation, Phone, Languages, HelpCircle, Mail, Send, CheckCircle, AlertCircle
@@ -54,7 +54,7 @@ const HelpSupport = () => {
     setStatusMessage('');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/support', formData);
+      const res = await axiosInstance.post('/support', formData);
       setSubmitStatus('success');
       setStatusMessage(res.data.message || 'Your message has been sent');
       setFormData({ name: '', email: '', message: '' });

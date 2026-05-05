@@ -84,10 +84,10 @@ const Home = () => {
       {/* Hero & Search Section */}
       <section className="flex flex-col items-center">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
             Medical care, <span className="text-primary-blue">wherever you travel</span>
           </h1>
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto font-medium">
+          <p className="text-base md:text-xl text-gray-500 max-w-2xl mx-auto font-medium">
             Find the best hospitals and doctors across the globe with support in your language. 
             Your health, our priority, anywhere in the world.
           </p>

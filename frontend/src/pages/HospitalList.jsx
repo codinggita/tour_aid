@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Phone, MapPin, Star, ChevronDown, Map, Navigation } from 'lucide-react';
+import { Phone, MapPin, Star, ChevronDown, Navigation, SlidersHorizontal, X } from 'lucide-react';
 import hospitalService from '../services/hospitalService';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -36,10 +36,10 @@ const HospitalList = () => {
     lng: null,
     city: ''
   });
-  const [activePin, setActivePin] = useState(null);
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     const fetchHospitalsData = async () => {
@@ -81,112 +81,138 @@ const HospitalList = () => {
     return parts.length ? `Showing ${parts.join(', ')} hospitals` : 'Showing all hospitals';
   };
 
-  return (
-    <div className="flex gap-6 h-[calc(100vh-70px-4rem)]">
+  const FilterPanel = () => (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-gray-900">Filters</h2>
+        <button onClick={handleUseLocation} className="text-xs font-bold text-primary-blue hover:underline flex items-center gap-1">
+          <Navigation size={12} /> Use My Location
+        </button>
+      </div>
 
-      {/* LEFT SIDEBAR */}
-      <aside className="w-64 shrink-0 bg-white rounded-2xl shadow-sm p-6 overflow-y-auto border border-gray-100 flex flex-col gap-6">
+      {/* Language */}
+      <div>
+        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Language</h3>
+        <div className="relative group">
+          <select
+            value={filters.language}
+            onChange={(e) => setFilters(prev => ({ ...prev, language: e.target.value }))}
+            className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-medium pr-8 focus:outline-none focus:border-primary-blue cursor-pointer"
+          >
+            <option value="English">English speaking</option>
+            <option value="Hindi">Hindi speaking</option>
+            <option value="Gujarati">Gujarati speaking</option>
+          </select>
+          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary-blue pointer-events-none" />
+        </div>
+      </div>
+
+      <hr className="border-gray-100" />
+
+      {/* Specialties */}
+      <div>
+        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Specialties</h3>
+        <div className="relative">
+          <select
+            value={filters.specialty}
+            onChange={(e) => setFilters(prev => ({ ...prev, specialty: e.target.value }))}
+            className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-medium pr-8 focus:outline-none focus:border-primary-blue cursor-pointer">
+            <option value="">All Specialties</option>
+            <option value="Cardiology">Cardiology</option>
+            <option value="Pediatrics">Pediatrics</option>
+            <option value="Orthopedics">Orthopedics</option>
+            <option value="Oncology">Oncology</option>
+            <option value="Neurology">Neurology</option>
+          </select>
+          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+        </div>
+      </div>
+
+      <hr className="border-gray-100" />
+
+      {/* Rating */}
+      <div>
+        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Minimum Rating</h3>
+        <div className="flex flex-wrap gap-2">
+          {[4, 4.5, 4.7, 4.9].map(rating => (
+            <button
+              key={rating}
+              onClick={() => setFilters(prev => ({ ...prev, rating: filters.rating === rating ? null : rating }))}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold border transition-all ${
+                filters.rating === rating
+                  ? 'bg-primary-blue text-white border-primary-blue shadow-md'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-primary-blue hover:text-primary-blue'
+              }`}
+            >
+              <Star size={12} className={filters.rating === rating ? 'fill-white text-white' : 'fill-amber-400 text-amber-400'} />
+              {rating}+
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <hr className="border-gray-100" />
+
+      {/* Open Now Toggle */}
+      <div>
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Filters</h2>
-          <button onClick={handleUseLocation} className="text-xs font-bold text-primary-blue hover:underline flex items-center gap-1">
-            <Navigation size={12} /> Use My Location
+          <h3 className="text-sm font-bold text-gray-700">Open Now</h3>
+          <button
+            onClick={() => setOpenNow(!openNow)}
+            className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${openNow ? 'bg-primary-blue' : 'bg-gray-200'}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${openNow ? 'translate-x-5' : 'translate-x-0'}`} />
           </button>
         </div>
+        {openNow && (
+          <p className="text-xs text-primary-blue font-semibold mt-2">Showing open facilities only</p>
+        )}
+      </div>
 
-        {/* Language */}
-        <div>
-          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Language</h3>
-          <div className="relative group">
-            <select 
-              value={filters.language}
-              onChange={(e) => setFilters(prev => ({ ...prev, language: e.target.value }))}
-              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-medium pr-8 focus:outline-none focus:border-primary-blue cursor-pointer"
-            >
-              <option value="English">English speaking</option>
-              <option value="Hindi">Hindi speaking</option>
-              <option value="Gujarati">Gujarati speaking</option>
-            </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary-blue pointer-events-none" />
-          </div>
-        </div>
+      <hr className="border-gray-100" />
 
-        <hr className="border-gray-100" />
+      <button onClick={clearFilters} className="w-full py-2.5 border border-gray-200 text-gray-500 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">
+        Clear All Filters
+      </button>
+    </div>
+  );
 
-        {/* Specialties */}
-        <div>
-          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Specialties</h3>
-          <div className="relative">
-            <select 
-              value={filters.specialty}
-              onChange={(e) => setFilters(prev => ({ ...prev, specialty: e.target.value }))}
-              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-medium pr-8 focus:outline-none focus:border-primary-blue cursor-pointer">
-              <option value="">All Specialties</option>
-              <option value="Cardiology">Cardiology</option>
-              <option value="Pediatrics">Pediatrics</option>
-              <option value="Orthopedics">Orthopedics</option>
-              <option value="Oncology">Oncology</option>
-              <option value="Neurology">Neurology</option>
-            </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
+  return (
+    <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-70px-4rem)]">
 
-        <hr className="border-gray-100" />
-
-        {/* Rating */}
-        <div>
-          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Minimum Rating</h3>
-          <div className="flex flex-wrap gap-2">
-            {[4, 4.5, 4.7, 4.9].map(rating => (
-              <button
-                key={rating}
-                onClick={() => setFilters(prev => ({ ...prev, rating: filters.rating === rating ? null : rating }))}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold border transition-all ${
-                  filters.rating === rating
-                    ? 'bg-primary-blue text-white border-primary-blue shadow-md'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-primary-blue hover:text-primary-blue'
-                }`}
-              >
-                <Star size={12} className={filters.rating === rating ? 'fill-white text-white' : 'fill-amber-400 text-amber-400'} />
-                {rating}+
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <hr className="border-gray-100" />
-
-        {/* Open Now Toggle */}
-        <div>
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-700">Open Now</h3>
-            <button
-              onClick={() => setOpenNow(!openNow)}
-              className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${openNow ? 'bg-primary-blue' : 'bg-gray-200'}`}
-            >
-              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${openNow ? 'translate-x-5' : 'translate-x-0'}`} />
-            </button>
-          </div>
-          {openNow && (
-            <p className="text-xs text-primary-blue font-semibold mt-2">Showing open facilities only</p>
-          )}
-        </div>
-
-        <hr className="border-gray-100" />
-
-        <button onClick={clearFilters} className="w-full py-2.5 border border-gray-200 text-gray-500 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">
-          Clear All Filters
+      {/* Mobile Filter Toggle Button */}
+      <div className="lg:hidden">
+        <button
+          id="mobile-filter-toggle"
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white border border-gray-200 rounded-2xl shadow-sm font-semibold text-gray-700 hover:border-primary-blue hover:text-primary-blue transition-all"
+        >
+          <SlidersHorizontal size={18} />
+          {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
+          {showMobileFilters ? <X size={16} /> : <ChevronDown size={16} />}
         </button>
+
+        {/* Mobile Filter Panel */}
+        {showMobileFilters && (
+          <div className="mt-3 bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+            <FilterPanel />
+          </div>
+        )}
+      </div>
+
+      {/* LEFT SIDEBAR — Desktop only */}
+      <aside className="hidden lg:flex w-64 shrink-0 bg-white rounded-2xl shadow-sm p-6 overflow-y-auto border border-gray-100 flex-col gap-6">
+        <FilterPanel />
       </aside>
 
       {/* CENTER — Hospital Cards */}
       <main className="flex-1 overflow-y-auto pr-1">
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-gray-500 font-medium">{getFilterText()}: <span className="text-gray-900 font-bold">{hospitals.length} facilities</span> found</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <p className="text-gray-500 font-medium text-sm sm:text-base">{getFilterText()}: <span className="text-gray-900 font-bold">{hospitals.length} facilities</span> found</p>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             Sort by:
             <div className="relative">
-              <select 
+              <select
                 value={filters.sortBy}
                 onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
                 className="appearance-none bg-white border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-sm font-semibold text-gray-700 focus:outline-none focus:border-primary-blue cursor-pointer">
@@ -219,7 +245,7 @@ const HospitalList = () => {
         )}
 
         {!loading && !error && hospitals.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-5">
             {hospitals.map((h) => (
               <div key={h.id} className="bg-white rounded-2xl shadow-sm hover:shadow-md border border-gray-50 overflow-hidden transition-all group">
                 {/* Card Image */}
@@ -241,7 +267,7 @@ const HospitalList = () => {
                 <div className="p-5">
                   <h3 className="font-bold text-gray-900 text-base leading-tight mb-2">{h.name}</h3>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-3">
                     <span className="flex items-center gap-1">
                       <Navigation size={13} className="text-primary-blue" />
                       {h.distance}
@@ -252,7 +278,7 @@ const HospitalList = () => {
                     </span>
                   </div>
 
-                  {/* Language Tags */}
+                  {/* Language & Specialty Tags */}
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {h.languages.map(lang => (
                       <span key={lang} className="text-[11px] font-bold px-2.5 py-1 bg-blue-50 text-primary-blue rounded-md">
@@ -283,11 +309,11 @@ const HospitalList = () => {
         )}
       </main>
 
-      {/* RIGHT — Map Placeholder */}
+      {/* RIGHT — Map (xl+ only) */}
       <aside className="w-72 shrink-0 hidden xl:block rounded-2xl shadow-lg relative overflow-hidden border border-gray-100 z-0">
-        <MapContainer 
-          center={[20.5937, 78.9629]} 
-          zoom={4} 
+        <MapContainer
+          center={[20.5937, 78.9629]}
+          zoom={4}
           style={{ height: '100%', width: '100%' }}
           zoomControl={true}
         >
@@ -295,11 +321,11 @@ const HospitalList = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <MapUpdater 
-            center={filters.lat && filters.lng ? [filters.lat, filters.lng] : [20.5937, 78.9629]} 
-            zoom={filters.lat && filters.lng ? 11 : 4} 
+          <MapUpdater
+            center={filters.lat && filters.lng ? [filters.lat, filters.lng] : [20.5937, 78.9629]}
+            zoom={filters.lat && filters.lng ? 11 : 4}
           />
-          
+
           {hospitals.map(h => h.coordinates && (
             <Marker key={h.id} position={[h.coordinates.lat, h.coordinates.lng]}>
               <Popup>

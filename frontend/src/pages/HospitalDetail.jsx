@@ -41,7 +41,7 @@ const HospitalDetail = () => {
               <Star size={14} className="fill-amber-400 text-amber-400" /> {hospital.rating} Top Rated
             </span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">{hospital.name}</h1>
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold mb-3 tracking-tight">{hospital.name}</h1>
           <div className="flex items-center gap-2 text-gray-200 text-sm font-medium">
             <MapPin size={16} className="text-blue-400" />
             {hospital.address}

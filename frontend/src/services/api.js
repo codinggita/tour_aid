@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+import axiosInstance from './axiosInstance';
 
 // Helper function to map backend data to frontend UI expectations
 const mapHospitalData = (h) => ({
@@ -18,21 +18,16 @@ const mapHospitalData = (h) => ({
 });
 
 export const fetchHospitals = async () => {
-  const response = await fetch(`${API_URL}/hospitals`);
-  if (!response.ok) throw new Error('Failed to fetch hospitals');
-  const data = await response.json();
-  return data.map(mapHospitalData);
+  const response = await axiosInstance.get('/hospitals');
+  return response.data.map(mapHospitalData);
 };
 
 export const fetchHospitalById = async (id) => {
-  const response = await fetch(`${API_URL}/hospitals/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch hospital');
-  const data = await response.json();
-  return mapHospitalData(data);
+  const response = await axiosInstance.get(`/hospitals/${id}`);
+  return mapHospitalData(response.data);
 };
 
 export const fetchEmergencyNumbers = async () => {
-  const response = await fetch(`${API_URL}/emergency`);
-  if (!response.ok) throw new Error('Failed to fetch emergency numbers');
-  return response.json();
+  const response = await axiosInstance.get('/emergency');
+  return response.data;
 };
