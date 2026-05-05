@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
+import axiosInstance from './axiosInstance';
 
 const mapHospitalData = (h) => ({
   id: h._id || h.id,
@@ -20,7 +18,6 @@ const mapHospitalData = (h) => ({
 });
 
 const getHospitals = async (params = {}) => {
-    let url = `${API_URL}/hospitals`;
     const queryParams = [];
     if (params.lat && params.lng) {
         queryParams.push(`lat=${params.lat}&lng=${params.lng}`);
@@ -39,10 +36,7 @@ const getHospitals = async (params = {}) => {
     if (params.specialty) {
         queryParams.push(`specialty=${encodeURIComponent(params.specialty)}`);
     }
-    if (queryParams.length > 0) {
-        url += `?${queryParams.join('&')}`;
-    }
-    const response = await axios.get(url);
+    const response = await axiosInstance.get(`/hospitals${queryParams.length > 0 ? '?' + queryParams.join('&') : ''}`);
     return response.data.map(mapHospitalData);
 };
 

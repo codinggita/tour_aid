@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <footer className="bg-gray-100 mt-auto">
-      <div className="max-w-[1400px] mx-auto px-8 py-12">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           
           {/* TourAid Info */}
@@ -61,7 +61,7 @@ const Footer = () => {
 
       {/* Dark Bottom Bar */}
       <div className="bg-gray-900 py-4">
-        <div className="max-w-[1400px] mx-auto px-8 flex flex-col md:flex-row items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
           <p className="text-gray-400 text-sm">
             &copy; {new Date().getFullYear()} TourAid. All rights reserved.
           </p>

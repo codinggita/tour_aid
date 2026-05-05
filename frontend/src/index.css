@@ -7,7 +7,14 @@
 }
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  html {
+    overflow-x: hidden;
+  }
   body {
     @apply bg-bg-light text-gray-800;
+    overflow-x: hidden;
   }
 }
