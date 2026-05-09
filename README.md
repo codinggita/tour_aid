@@ -26,11 +26,15 @@ TourAid provides a **simple and fast way to access medical help**:
 * 💰 Basic consultation fee visibility
 
 ---
+## 🔗 Quick Links
 
- ## 🎨 Design (Figma)
-
-[![View Figma Design](https://img.shields.io/badge/Figma-View%20Design-blue?logo=figma)](https://www.figma.com/design/riPkfiXNQ0t3GuLqxmWbtc/Untitled?node-id=15-1458&t=Hu7DmS4G28YijguM-1)
-
+| Resource | Link |
+|----------|------|
+| 🎨 Figma Design | [View Design](https://www.figma.com/design/riPkfiXNQ0t3GuLqxmWbtc/Untitled?node-id=15-1458&t=Hu7DmS4G28YijguM-1) |
+| 🌐 Live Project | [Open TourAid](https://tour-aid-1.onrender.com/) |
+| ⚙️ Backend API | [Backend Server](https://tour-aid.onrender.com/api/hospitals) |
+| 📮 Postman Documentation | [View API Docs](https://documenter.getpostman.com/view/50840765/2sBXqKozno) |
+| ▶️ YouTube Demo | [Watch Demo](https://www.youtube.com/watch?v=jeEMNvhQwkk&t=76s) |
 ---
 
 ## 🔥 Unique Feature (USP)
